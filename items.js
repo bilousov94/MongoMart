@@ -123,7 +123,7 @@ function ItemDAO(database) {
     this.getNumItems = function(category, callback) {
         "use strict";
 
-        var numItems = 0;
+      //  var numItems = 0;
 
         /*
          * TODO-lab1C:
@@ -140,15 +140,22 @@ function ItemDAO(database) {
          *
          */
         if(category != "All"){
-            numItems = this.db.collection('item').find({"category": category}).count();
+            this.db.collection('item').find({"category": category}).count(function(err, count){
+                if(err) throw err;
+               callback(count);
+            });
+
         } else {
-            numItems = this.db.collection('item').find({}).count();
+            this.db.collection('item').find({}).count(function(err, count){
+                if(err) throw err;
+                callback(count);
+            });
         }
 
 
          // TODO Include the following line in the appropriate
          // place within your code to pass the count to the callback.
-        callback(numItems);
+       // callback(numItems);
     };
 
 
@@ -178,26 +185,33 @@ function ItemDAO(database) {
          * description. You should simply do this in the mongo shell.
          *
          */
+        this.db.collection('item').find( { $text: { $search: query}})
+                                    .limit(itemsPerPage)
+                                    .skip(itemsPerPage * page)
+                                    .toArray(function(err, docs){
+                assert.equal(err, null);
+                callback(docs);
+            });
 
-        var item = this.createDummyItem();
-        var items = [];
-        for (var i=0; i<5; i++) {
-            items.push(item);
-        }
+        //var item = this.createDummyItem();
+        //var items = [];
+        //for (var i=0; i<5; i++) {
+        //    items.push(item);
+        //}
 
         // TODO-lab2A Replace all code above (in this method).
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the items for the selected page
         // of search results to the callback.
-        callback(items);
-    }
+       // callback(items);
+    };
 
 
     this.getNumSearchItems = function(query, callback) {
         "use strict";
 
-        var numItems = 0;
+       // var numItems = 0;
 
         /*
         * TODO-lab2B
@@ -212,7 +226,12 @@ function ItemDAO(database) {
         * simply do this in the mongo shell.
         */
 
-        callback(numItems);
+        this.db.collection("item").find({$text: {$search: query}}).count(function(err, count){
+           assert.equal(err, null);
+            callback(count);
+        });
+
+       // callback(numItems);
     }
 
 
@@ -229,14 +248,19 @@ function ItemDAO(database) {
          *
          */
 
-        var item = this.createDummyItem();
+       this.db.collection('item').find({"_id": itemId}).next(function(err, item){
+           assert.equal(err, null);
+           callback(item);
+       });
+
+       // var item = this.createDummyItem();
 
         // TODO-lab3 Replace all code above (in this method).
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the matching item
         // to the callback.
-        callback(item);
+       // callback(item);
     }
 
 
